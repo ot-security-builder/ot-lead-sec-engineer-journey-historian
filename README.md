@@ -5,3 +5,4 @@ A daily log of one software engineer's move from Lead Software Engineer into OT/
 ## Daily logs
 - [2026-10-13](logs/2026-10-13.md)
 - [2026-10-14](logs/2026-10-14.md)
+- [2026-10-15](logs/2026-10-15.md)
