@@ -2,17 +2,17 @@
 
 **Written:** 2026-10-19 (expanded 2026-10-20 for portfolio)  
 **Alert:** [CERTFR-2026-ALE-012](https://www.cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-012/)  
-**Status:** Entry path still unconfirmed by authorities. Figures below are cited; gaps are marked.
+**Status:** Case 1 done (2026-10-20). Entry path still unconfirmed by authorities. Figures below are cited; gaps are marked.
 
 ---
 
 ## What happened
 
-Over the nights of 11–13 October 2026, attackers remotely took over internet-exposed supermarket refrigeration **system managers** (supervisory controllers) in France. They stretched **defrost** cycles (reports of ~1 hour → ~8 hours) so case heaters ran for hours. Staff found spoiled food, water, and in some places fire/smoke the next morning.
+Over the nights of 11–13 October 2026, attackers remotely took over internet-exposed supermarket refrigeration **system managers** (supervisory controllers) in France. They stretched **defrost** cycles from about **1 hour to 8 hours** in some freezers and cold rooms ([Le Monde, via TIME](https://time.com/article/2026/10/13/france-cyber-attack-cybersecurity-refrigeration-supermarket-food-security/)), so case heaters ran for hours and alarms that normally mute during defrost stayed quiet. Staff found spoiled food, water, and in some places fire/smoke the next morning.
 
 **Products named by CERT-FR:** Danfoss AK-SM / AK-SC, Copeland xweb, Dixell xweb.
 
-**Scale (claimed, not a forensic count):** Economy minister cited ~700 of ~10,000 French supermarkets. Chains named in press include Intermarché / Les Mousquetaires, Coopérative U, Carrefour, Monoprix, E.Leclerc. Losses reported as **millions of euros** ([SecurityWeek, 13 Oct](https://www.securityweek.com/refrigeration-controller-hack-spoils-food-across-european-supermarkets/)). No injuries or deaths reported. No national food shortage. No ransom demand and no public claim of responsibility.
+**Scale (claimed, not a forensic count):** Economy minister Roland Lescure cited ~**700** of ~10,000 French supermarkets ([AP News](https://apnews.com/article/france-cyberattack-supermarkets-refrigeration-systems-78a813a8efd466b360655339f96083dc)). Chains named in press include Intermarché / Les Mousquetaires, Coopérative U, Carrefour, Monoprix, E.Leclerc. Losses reported as **millions of euros** ([SecurityWeek, 13 Oct](https://www.securityweek.com/refrigeration-controller-hack-spoils-food-across-european-supermarkets/)). No injuries or deaths reported. No national food shortage. No ransom demand and no public claim of responsibility.
 
 ---
 
@@ -49,7 +49,7 @@ Shodan counts **results**, not stores. Geolocation often reflects ISP hubs, not 
 
 ## How access was gained (working assumption)
 
-**Confirmed:** management interfaces should not have been on the public internet ([CERT-FR](https://www.cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-012/)). Many units were **end-of-life** or on outdated firmware (Danfoss statement via press).
+**Confirmed:** management interfaces should not have been on the public internet ([CERT-FR](https://www.cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-012/)). Many units were **end-of-life** or on outdated firmware: Danfoss told [Cooling Post](https://www.coolingpost.com/world-news/danfoss-moves-to-mitigate-cyberattack/) most affected units were legacy AK-SM 800 / AK-SC 355 (no more security updates) or current AK-SM 800A on outdated firmware.
 
 **Working assumption used in this note:** weak / default credentials on the exposed login got the attacker into the defrost settings dashboard. Once logged in, no malware was needed; they changed normal settings and the system manager pushed them to the cases.
 
@@ -80,14 +80,15 @@ Shodan counts **results**, not stores. Geolocation often reflects ISP hubs, not 
 
 As OT lead, in order of leverage for *this* attack path:
 
-1. **Remove public internet exposure** — VPN (or private network) only for contractor remote access. CERT-FR's first instruction.
-2. **Firewall / source allowlist** as emergency stopgap, then replace with real VPN.
-3. **Replace EOL controllers**; keep supported units on current firmware; change defaults; Strict security mode where available.
+1. **Remove public internet exposure** — VPN (or private network) only for contractor remote access. CERT-FR's first instruction. **This alone would have blocked most of the euro loss**, because the login page would never have been findable from the open internet.
+2. **Firewall / source allowlist** as emergency stopgap, then replace with real VPN. **Reduces risk** if exposure slips; not a substitute for (1).
+3. **Replace EOL controllers**; keep supported units on current firmware; change defaults; Strict security mode where available. **Reduces risk** after someone reaches the login; does **not** help if the box is still exposed with a default password.
 4. **Unique strong passwords** and no shared "code of the day" support login on the open internet.
-5. **Independent monitoring** — out-of-band temperature sensors / alarms that are *not* silenced by the same HMI during extended defrost.
-6. **Hardwired thermal cutouts** on defrost heaters — last line for fire risk, not for food spoilage.
+5. **Alert on configuration changes** — especially defrost schedule / duration and setpoint changes across a store fleet overnight. Nobody caught hundreds of stores flipping from ~1h to ~8h defrost in real time. This is the monitoring must-do: detect the change before the food cooks. (Roadmap item: SIEM / log monitoring for OT config.)
+6. **Independent monitoring** — out-of-band temperature sensors / alarms that are *not* silenced by the same HMI during extended defrost.
+7. **Hardwired thermal cutouts** on defrost heaters — last line for fire risk, not for food spoilage.
 
-Any one of (1)–(3) would have blocked most of the euro loss. (5)–(6) limit blast radius after login.
+(5)–(7) limit blast radius after login. Detection (5) is what was missing between settings changed and morning spoil.
 
 ---
 
@@ -108,6 +109,9 @@ Any one of (1)–(3) would have blocked most of the euro loss. (5)–(6) limit b
 - [Censys — Frostbitten in France](https://censys.com/blog/frostbitten-in-france-a-danfoss-storeview-internet-exposure-report/)
 - [Cybersecurity Dive — thousands still exposed](https://www.cybersecuritydive.com/news/thousands-refrigerator-devices-exposed-french-cyberattack/833117/)
 - [CISA ICSA-25-140-03 (Danfoss)](https://www.cisa.gov/news-events/ics-advisories/icsa-25-140-03)
+- [AP News — Lescure ~700 stores](https://apnews.com/article/france-cyberattack-supermarkets-refrigeration-systems-78a813a8efd466b360655339f96083dc)
+- [TIME — Le Monde on 1h→8h defrost](https://time.com/article/2026/10/13/france-cyber-attack-cybersecurity-refrigeration-supermarket-food-security/)
+- [Cooling Post — Danfoss mitigation / EOL statement](https://www.coolingpost.com/world-news/danfoss-moves-to-mitigate-cyberattack/)
 
 ---
 
