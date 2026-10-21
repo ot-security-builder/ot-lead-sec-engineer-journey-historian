@@ -84,7 +84,7 @@ As OT lead, in order of leverage for *this* attack path:
 2. **Firewall / source allowlist** as emergency stopgap, then replace with real VPN. **Reduces risk** if exposure slips; not a substitute for (1).
 3. **Replace EOL controllers**; keep supported units on current firmware; change defaults; Strict security mode where available. **Reduces risk** after someone reaches the login; does **not** help if the box is still exposed with a default password.
 4. **Unique strong passwords** and no shared "code of the day" support login on the open internet.
-5. **Alert on configuration changes** — especially defrost schedule / duration and setpoint changes across a store fleet overnight. Nobody caught hundreds of stores flipping from ~1h to ~8h defrost in real time. This is the monitoring must-do: detect the change before the food cooks. (Roadmap item: SIEM / log monitoring for OT config.)
+5. **Alert on configuration changes** — especially defrost schedule / duration and setpoint changes across a store fleet overnight. Nobody caught hundreds of stores flipping from ~1h to ~8h defrost in real time. This is the monitoring must-do: detect the change before the food cooks. (Roadmap item: Malcolm plus a vendor trial for OT monitoring.)
 6. **Independent monitoring** — out-of-band temperature sensors / alarms that are *not* silenced by the same HMI during extended defrost.
 7. **Hardwired thermal cutouts** on defrost heaters — last line for fire risk, not for food spoilage.
 
