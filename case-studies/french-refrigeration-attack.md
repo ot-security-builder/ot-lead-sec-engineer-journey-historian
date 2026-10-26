@@ -147,7 +147,10 @@ As OT lead, in order of leverage for *this* attack path:
 - Attribution: **unknown**.
 - Audited nationwide loss total: **unknown** (press says millions of euros).
 - Contractor vs retailer ownership of each modem/IP: **reported as the usual pattern; not forensically mapped store-by-store in this note**.
-
+- Update, Oct 26, 2026: [Public Senate coverage of ANSSI testimony](https://www.publicsenat.fr/actualites/politique/des-defauts-de-securisation-elementaire-et-des-mots-de-passe-faibles-ont-permis-la-cyberattaque-contre-les-frigos-de-supermarches)
+- Entry path: the initial-access section from suspected to confirmed(weak password): Internet exposure + weak passwords, with Claroty flaws not used.
+- Contractor path remains uncofromed
+- Exposure numbers: 12,976 exposed services across 99 countries. Censys' figure about 3000 panels (Oct 11) and Shodan check of 2,453 French results on Oct 20
 ---
 
 ## Sources
