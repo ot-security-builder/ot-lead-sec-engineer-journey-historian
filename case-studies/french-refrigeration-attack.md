@@ -2,7 +2,7 @@
 
 **Written:** 2026-10-19 (expanded 2026-10-20 for portfolio)  
 **Alert:** [CERTFR-2026-ALE-012](https://www.cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-012/)  
-**Status:** Case 1 done (2026-10-20). Entry path still unconfirmed by authorities. Figures below are cited; gaps are marked.
+**Status:** Case 1 done (2026-10-20). **Updated 2026-10-26:** ANSSI confirmed the entry path (internet exposure plus weak passwords); Purdue mapping added. Figures below are cited; gaps are marked.
 
 ---
 
@@ -20,7 +20,7 @@ Over the nights of 11–13 October 2026, attackers remotely took over internet-e
 
 ```text
 Internet
-   → contractor remote path (often cellular modem / public IP, no VPN)
+   → remote path (public IP, no VPN; a contractor path is reported as the usual pattern but not confirmed)
       → system manager web UI (Danfoss StoreView / XWEB)
          → case controllers (one per display case / cold room)
             → heaters, valves, fans, sensors
@@ -47,13 +47,15 @@ Shodan counts **results**, not stores. Geolocation often reflects ISP hubs, not 
 
 ---
 
-## How access was gained (working assumption)
+## How access was gained (confirmed by ANSSI, 21 Oct 2026)
+
+**Update 2026-10-26:** On 21 Oct 2026, ANSSI's director told the French Senate that attackers got in through refrigeration controllers left directly on the internet, with unprotected admin access and weak passwords. He rejected reports that the Claroty-disclosed flaws were used ([Public Sénat](https://www.publicsenat.fr/actualites/politique/des-defauts-de-securisation-elementaire-et-des-mots-de-passe-faibles-ont-permis-la-cyberattaque-contre-les-frigos-de-supermarches)). The working assumption below is now confirmed.
 
 **Confirmed:** management interfaces should not have been on the public internet ([CERT-FR](https://www.cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-012/)). Many units were **end-of-life** or on outdated firmware: Danfoss told [Cooling Post](https://www.coolingpost.com/world-news/danfoss-moves-to-mitigate-cyberattack/) most affected units were legacy AK-SM 800 / AK-SC 355 (no more security updates) or current AK-SM 800A on outdated firmware.
 
-**Working assumption used in this note:** weak / default credentials on the exposed login got the attacker into the defrost settings dashboard. Once logged in, no malware was needed; they changed normal settings and the system manager pushed them to the cases.
+**Original working assumption (now confirmed):** weak / default credentials on the exposed login got the attacker into the defrost settings dashboard. Once logged in, no malware was needed; they changed normal settings and the system manager pushed them to the cases.
 
-**Still unconfirmed by CERT-FR / ANSSI / Danfoss:** the exact login method. Researchers also discuss a date-based support password (e.g. CVE-2025-41450 on AK-SM 800A before R4.2) and Claroty-disclosed flaws. Those are plausible, not proven for this campaign.
+**Ruled out by ANSSI:** the Claroty-disclosed flaws. Researchers also discussed a date-based support password (e.g. CVE-2025-41450 on AK-SM 800A before R4.2); ANSSI described the cause as weak passwords and did not name a CVE.
 
 ---
 
@@ -61,8 +63,55 @@ Shodan counts **results**, not stores. Geolocation often reflects ISP hubs, not 
 
 1. **No VPN / no firewall** in front of the controller (public login page = perimeter).
 2. **Unsupported / outdated gear** that cannot be patched (CERT-FR: factory reset alone is not enough if you put an EOL unit back on the internet).
-3. **Weak authentication** (defaults / guessable support codes — assumed here).
+3. **Weak authentication** (weak passwords — confirmed by ANSSI, 21 Oct 2026).
 4. **No independent last line for the physical process.** Temperature alarms ride the same controller. Supermarket refrigeration typically has no SIS. At most, hardwired thermal cutouts on heaters; fires in some stores suggest those were missing, failed, or not reported in detail.
+
+---
+
+## Purdue model mapping (added 2026-10-26)
+
+```text
+[ LEVEL 5: Public Internet ]
+  │
+  │ (Direct web request: skipping Levels 4 & 3.5 via exposed public IP)
+  └──────────────────────────────────────────────────────┐
+                                                         │
+[ LEVEL 4: Business IT ] ─── [ BYPASSED BY ARCHITECTURE ] │
+                                                         │
+[ LEVEL 3.5: Industrial DMZ ] ─── [ MISSING LAYER ]      │
+                                                         │
+  ┌──────────────────────────────────────────────────────┘
+  ▼
+[ LEVEL 2 & 3: Supervisory & Site Operations Control ]
+  ├── Component: System manager panel / web dashboard
+  │     (e.g., Danfoss, Copeland xweb, Dixell xweb) [2]
+  └── Vulnerability: Weak/default admin credentials
+        exposed to the internet [1]
+  │
+  ▼ (Valid commands, accepted as legitimate by the local control plane)
+[ LEVEL 1: Local Control ]
+  ├── Component: Refrigeration case controllers
+  └── Exploit reality: NOT hacked or compromised; controllers
+        executed native logic exactly as instructed
+  │
+  ▼ (Malicious defrost settings)
+[ LEVEL 0: Physical Process ]
+  ├── Components: Compressors, freezers, defrost heaters,
+  │     temperature sensors
+  └── Physical impact: Defrost heaters forced into continuous
+        operation. Temperatures up to about 50°C (122°F) [2],
+        food spoilage at about 700 supermarkets [4], and
+        fires at several [3].
+```
+
+**Takeaway:** a Level 2 device placed directly on Level 5 skips every defensive layer in between. No malware was needed; the controllers did exactly what the supervisor told them.
+
+**References for this diagram**
+
+- [1] ANSSI Senate testimony: [Public Sénat](https://www.publicsenat.fr/actualites/politique/des-defauts-de-securisation-elementaire-et-des-mots-de-passe-faibles-ont-permis-la-cyberattaque-contre-les-frigos-de-supermarches)
+- [2] Brands and temperature: [Cybersecurity Dive](https://www.cybersecuritydive.com/news/refrigeration-france-cyber/832858/)
+- [3] Fires: [NBC News / Reuters](https://www.nbcnews.com/world/europe/hackers-heat-french-supermarket-fridges-sparking-fires-spoiling-food-rcna603151)
+- [4] About 700 stores: [AP News](https://apnews.com/article/france-cyberattack-supermarkets-refrigeration-systems-78a813a8efd466b360655339f96083dc)
 
 ---
 
@@ -94,7 +143,7 @@ As OT lead, in order of leverage for *this* attack path:
 
 ## Open gaps (honest)
 
-- Exact CVE / credential path used in the field: **not publicly confirmed**.
+- Entry path: **confirmed by ANSSI (21 Oct 2026)** as internet exposure plus weak passwords; Claroty flaws ruled out. No specific CVE named.
 - Attribution: **unknown**.
 - Audited nationwide loss total: **unknown** (press says millions of euros).
 - Contractor vs retailer ownership of each modem/IP: **reported as the usual pattern; not forensically mapped store-by-store in this note**.
@@ -112,6 +161,9 @@ As OT lead, in order of leverage for *this* attack path:
 - [AP News — Lescure ~700 stores](https://apnews.com/article/france-cyberattack-supermarkets-refrigeration-systems-78a813a8efd466b360655339f96083dc)
 - [TIME — Le Monde on 1h→8h defrost](https://time.com/article/2026/10/13/france-cyber-attack-cybersecurity-refrigeration-supermarket-food-security/)
 - [Cooling Post — Danfoss mitigation / EOL statement](https://www.coolingpost.com/world-news/danfoss-moves-to-mitigate-cyberattack/)
+- [Public Sénat — ANSSI Senate testimony (21 Oct 2026)](https://www.publicsenat.fr/actualites/politique/des-defauts-de-securisation-elementaire-et-des-mots-de-passe-faibles-ont-permis-la-cyberattaque-contre-les-frigos-de-supermarches)
+- [Cybersecurity Dive — flaws disclosed months before attacks](https://www.cybersecuritydive.com/news/refrigeration-france-cyber/832858/)
+- [NBC News / Reuters — fires and spoiled food](https://www.nbcnews.com/world/europe/hackers-heat-french-supermarket-fridges-sparking-fires-spoiling-food-rcna603151)
 
 ---
 
