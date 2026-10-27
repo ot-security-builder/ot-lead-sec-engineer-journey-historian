@@ -49,7 +49,7 @@ Shodan counts **results**, not stores. Geolocation often reflects ISP hubs, not 
 
 ## How access was gained (confirmed by ANSSI, 21 Oct 2026)
 
-**Update 2026-10-26:** On 21 Oct 2026, ANSSI's director told the French Senate that attackers got in through refrigeration controllers left directly on the internet, with unprotected admin access and weak passwords. He rejected reports that the Claroty-disclosed flaws were used ([Public Sénat](https://www.publicsenat.fr/actualites/politique/des-defauts-de-securisation-elementaire-et-des-mots-de-passe-faibles-ont-permis-la-cyberattaque-contre-les-frigos-de-supermarches)). The working assumption below is now confirmed.
+On 21 Oct 2026, ANSSI's director told the French Senate that attackers got in through refrigeration controllers left directly on the internet, with unprotected admin access and weak passwords. He rejected reports that the Claroty-disclosed flaws were used ([Public Sénat](https://www.publicsenat.fr/actualites/politique/des-defauts-de-securisation-elementaire-et-des-mots-de-passe-faibles-ont-permis-la-cyberattaque-contre-les-frigos-de-supermarches)). The working assumption below is now confirmed.
 
 **Confirmed:** management interfaces should not have been on the public internet ([CERT-FR](https://www.cert.cyber.gouv.fr/alerte/CERTFR-2026-ALE-012/)). Many units were **end-of-life** or on outdated firmware: Danfoss told [Cooling Post](https://www.coolingpost.com/world-news/danfoss-moves-to-mitigate-cyberattack/) most affected units were legacy AK-SM 800 / AK-SC 355 (no more security updates) or current AK-SM 800A on outdated firmware.
 
@@ -147,10 +147,9 @@ As OT lead, in order of leverage for *this* attack path:
 - Attribution: **unknown**.
 - Audited nationwide loss total: **unknown** (press says millions of euros).
 - Contractor vs retailer ownership of each modem/IP: **reported as the usual pattern; not forensically mapped store-by-store in this note**.
-- Update, Oct 26, 2026: [Public Senate coverage of ANSSI testimony](https://www.publicsenat.fr/actualites/politique/des-defauts-de-securisation-elementaire-et-des-mots-de-passe-faibles-ont-permis-la-cyberattaque-contre-les-frigos-de-supermarches)
-- Entry path: the initial-access section from suspected to confirmed(weak password): Internet exposure + weak passwords, with Claroty flaws not used.
-- Contractor path remains uncofromed
-- Exposure numbers: 12,976 exposed services across 99 countries. Censys' figure about 3000 panels (Oct 11) and Shodan check of 2,453 French results on Oct 20
+- Contractor path: **unconfirmed**.
+- Exposure numbers: 12,976 exposed services across 99 countries. Censys counted about 3,000 panels (Oct 11); a Shodan check found 2,453 French results on Oct 20.
+
 ---
 
 ## Sources
