@@ -19,3 +19,5 @@ A daily log of one software engineer's move from Lead Software Engineer into OT/
 - [2026-10-26](logs/2026-10-26.md)
 - [2026-10-27](logs/2026-10-27.md) (day off)
 - [2026-10-28](logs/2026-10-28.md) (day off)
+- [2026-10-29](logs/2026-10-29.md) (day off)
+- [2026-10-30](logs/2026-10-30.md) (rest day; automated news roundup only)
